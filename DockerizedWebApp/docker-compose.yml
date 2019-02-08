@@ -1,0 +1,37 @@
+version: '2'
+services: 
+  mysql-standalone_5.6:
+    image: mysql:5.6
+    environment:
+       - MYSQL_PASSWORD=root
+       - MYSQL_DATABASE=TestDB
+       - MYSQL_ROOT_PASSWORD=root
+    ports:
+       - 3306:3306
+       
+  demo-docker:
+    image: demo-docker
+    build:
+      context: ./demo
+      dockerfile: ./Dockerfile.spring
+    depends_on:
+      - mysql-standalone_5.6
+    ports:
+      - 8086:8086
+    links:
+      - mysql-standalone_5.6
+    environment:
+      - CATALINA_OPTS=-Dspring.profiles.active=container
+      - DATABASE_HOST=mysql-standalone_5.6
+      - DATABASE_USER=root
+      - DATABASE_PASSWORD=root
+      - DATABASE_NAME=TestDB
+      - DATABASE_PORT=3306
+  angular-docker-service:
+    image: ngapp
+    build:
+      context: ./AngularCrud
+      dockerfile: ./Dockerfile.angular
+    ports:
+       - 4200:4200
+  
